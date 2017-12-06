@@ -3,6 +3,10 @@ from itertools import combinations
 import random
 import numpy as np
 
+def cosine_distnace(v1, v2):
+    cos = np.dot(v1, v2)/(np.linalg.norm(v1)*np.linalg.norm(v2))
+    return cos
+
 def get_dataset(features_file):
 	with open(features_file) as f:
 		lines = [line.strip("\n").split(" ") for line in f.readlines()]
@@ -23,8 +27,12 @@ def get_dataset(features_file):
 	random.shuffle(_diff)
 	samples = []
 	for i in range(len(_same)):
-		diff_sample = [map(float, _diff[i][0][2:]) + map(float, _diff[i][1][2:]), 0]
-		same_sample = [map(float, _same[i][0][2:]) + map(float, _same[i][1][2:]), 1]
+		# diff_sample = [map(float, _diff[i][0][2:]) + map(float, _diff[i][1][2:]), 0]
+		# same_sample = [map(float, _same[i][0][2:]) + map(float, _same[i][1][2:]), 1]
+		# samples.extend(diff_sample)
+		# samples.extend(same_sample)
+		diff_sample = [[cosine_distnace(map(float, _diff[i][0][2:]), map(float, _diff[i][1][2:]))], 0]
+		same_sample = [[cosine_distnace(map(float, _same[i][0][2:]), map(float, _same[i][1][2:]))], 1]
 		samples.extend(diff_sample)
 		samples.extend(same_sample)
 	samples = np.reshape(np.array(samples), (-1, 2))
@@ -34,10 +42,10 @@ def get_dataset(features_file):
 if __name__ == "__main__":
 	train_data, train_label = get_dataset("./train_features.txt")
 	test_data, test_label = get_dataset("./test_features.txt")
-	# clf = svm.SVC(kernel='linear', probability=True, C=10.0)
-	# clf = svm.SVC(kernel='poly', degree=3, probability=True, C=10.0)
-	clf = svm.SVC(probability=True, C=20.0)
-	# clf = svm.SVC(kernel='sigmoid', probability=True)
+	# clf = svm.SVC(kernel='linear', probability=True, C=30.0)
+	# clf = svm.SVC(kernel='poly', degree=4, probability=True, C=100.0)
+	# clf = svm.SVC(probability=True, C=30.0)
+	# clf = svm.SVC(kernel='sigmoid', probability=True, C=10)
 	clf.fit(train_data, train_label)
 	result = clf.predict_proba(test_data)
 	correct = 0
